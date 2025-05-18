@@ -1,6 +1,6 @@
 # 🛩️ Dogfight - Expo Game Demo
 
-![cde6a5c3-260a-4f88-bd43-0b3ccf2f408a](https://github.com/user-attachments/assets/28fff063-2dd3-4e31-94ed-54aadcea85c0)
+<img src="https://github.com/user-attachments/assets/28fff063-2dd3-4e31-94ed-54aadcea85c0" alt="screenshot" width="400"/>
 
 **Dogfight** is a simple game built with **React Native** and **Expo** that lets players control an airplane using motion controls via the device’s **gyroscope**. This project serves as a showcase and educational demo of the `expo-sensors` library, specifically its `Gyroscope` module.
 
