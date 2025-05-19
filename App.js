@@ -5,7 +5,8 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 
 export default function App() {
   const [gyroData, setGyroData] = useState({ x: 0, y: 0, z: 0 });
-  const planePosition = useSharedValue(Dimensions.get('window').width / 2 - 25);
+  const planeXPosition = useSharedValue(Dimensions.get('window').width / 2 - 25);
+  const planeYPosition = useSharedValue(Dimensions.get('window').height - 150); // Começa mais acima do fundo
   const [score, setScore] = useState(0);
   const skyOffset = useSharedValue(0);
   const animationRef = useRef(null);
@@ -23,19 +24,32 @@ export default function App() {
     };
   }, []);
 
-  // Configuração do giroscópio (eixo Z para controle radial)
+  // Configuração do giroscópio
   useEffect(() => {
     Gyroscope.setUpdateInterval(16); // ~60fps
 
     const subscription = Gyroscope.addListener((data) => {
       setGyroData(data);
-      // Usamos o eixo Z para controle radial (girar o celular como volante)
-      planePosition.value = withSpring(
+      
+      // Controle horizontal (eixo Y do giroscópio)
+      planeXPosition.value = withSpring(
         Math.max(
           0,
           Math.min(
             Dimensions.get('window').width - 50,
-            planePosition.value - data.z * 20 // Ajuste a sensibilidade aqui
+            planeXPosition.value - data.y * 20 // Ajuste a sensibilidade aqui
+          )
+        ),
+        { damping: 10, stiffness: 100 }
+      );
+      
+      // Controle vertical (eixo X do giroscópio)
+      planeYPosition.value = withSpring(
+        Math.max(
+          50, // Limite superior
+          Math.min(
+            Dimensions.get('window').height - 50, // Limite inferior
+            planeYPosition.value + data.x * 20 // Ajuste a sensibilidade aqui
           )
         ),
         { damping: 10, stiffness: 100 }
@@ -47,10 +61,13 @@ export default function App() {
     };
   }, []);
 
-  // Estilo animado do avião (horizontal apenas)
+  // Estilo animado do avião (horizontal e vertical)
   const planeStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: planePosition.value }],
+      transform: [
+        { translateX: planeXPosition.value },
+        { translateY: planeYPosition.value }
+      ],
     };
   });
 
@@ -97,7 +114,8 @@ export default function App() {
       {/* UI sobreposta */}
       <View style={styles.overlay}>
         <Text style={styles.score}>Pontuação: {score}</Text>
-        <Text style={styles.instructions}>Gire o dispositivo como um volante para controlar o avião</Text>
+        <Text style={styles.instructions}>Incline o dispositivo para controlar o avião</Text>
+        <Text style={styles.instructions}>Eixo X: {gyroData.x.toFixed(2)} | Eixo Y: {gyroData.y.toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -112,13 +130,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: '#3FC2FF', // Cor igual ao céu da sua imagem
+    backgroundColor: '#3FC2FF',
     zIndex: -2,
   },
   skyContainer: {
     position: 'absolute',
     width: '100%',
-    height: Dimensions.get('window').height * 2, // Dobro da altura para o loop
+    height: Dimensions.get('window').height * 2,
+  zIndex: -1,
   },
   skyImage: {
     width: '100%',
@@ -135,8 +154,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 60,
     height: 60,
-    bottom: 100, // Posição vertical fixa
-    left: 0,
+    // Removemos a posição fixa bottom/left pois será controlada pelo animated
   },
   overlay: {
     position: 'absolute',
