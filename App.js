@@ -113,7 +113,6 @@ export default function App() {
 
       {/* UI sobreposta */}
       <View style={styles.overlay}>
-        <Text style={styles.score}>Pontuação: {score}</Text>
         <Text style={styles.instructions}>Incline o dispositivo para controlar o avião</Text>
         <Text style={styles.instructions}>Eixo X: {gyroData.x.toFixed(2)} | Eixo Y: {gyroData.y.toFixed(2)}</Text>
       </View>
